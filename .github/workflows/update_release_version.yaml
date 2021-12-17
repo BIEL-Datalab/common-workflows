@@ -14,7 +14,7 @@ on:
          
 
 jobs:
-  add_tag:
+  update_release_version:
     if: ${{ contains(github.event.review.body, 'release-') }}
     runs-on: ubuntu-latest
     steps:
