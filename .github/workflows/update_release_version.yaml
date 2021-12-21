@@ -11,6 +11,11 @@ on:
          default: false
          required: false
          type: boolean
+       has_deployment:
+         description: "has the deploymen.yaml or not"
+         default: true
+         required: false
+         type: boolean
          
 
 jobs:
@@ -29,6 +34,7 @@ jobs:
           echo VERSION=$VERSION
           echo "::set-output name=version::$VERSION"
       - name: Modify Deployment Yaml Tag
+        if: ${{ inputs.has_deployment }}
         uses: mikefarah/yq@master
         with:
           cmd: 
