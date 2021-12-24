@@ -2,6 +2,12 @@
 name: Push tag pipeline
 on:
   workflow_call:
+    inputs:
+       has_canary:
+         description: "has the canary.yaml or not"
+         default: false
+         required: false
+         type: boolean
          
 jobs:
   push_tag:
