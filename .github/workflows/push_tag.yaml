@@ -25,7 +25,7 @@ jobs:
         id: lookupVersion
         uses: mikefarah/yq@master
         with:
-          cmd: yq e '.spec.template.spec.containers[0].image' 'deployment/$deply_file_name'
+          cmd: yq e '.spec.template.spec.containers[0].image' 'deployment/"$deply_file_name"'
       - name: Push Tag
         run: |
           git tag $(echo "${{ steps.lookupVersion.outputs.result }}"  | sed "s/.*release-\([^ ]*\).*$/\1/")
