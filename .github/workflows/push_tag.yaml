@@ -2,18 +2,30 @@
 name: Push tag pipeline
 on:
   workflow_call:
-         
+    inputs:
+      has_canary:
+        description: "has the canary.yaml or not"
+        default: false
+        required: false
+        type: boolean
+
 jobs:
   push_tag:
     if: ${{ contains(toJSON(github.event.commits), 'Update image tag to') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.4.0
+      - name: Set env to deployment
+        if: ${{ !has_canary }}
+        run:  echo "deply_file_name=deployment.yaml" >> $GITHUB_ENV
+      - name: Set env to canary
+        if: ${{ has_canary }}
+        run:  echo "deply_file_name=canary.yaml" >> $GITHUB_ENV
       - name: Extract Version
         id: lookupVersion
         uses: mikefarah/yq@master
         with:
-          cmd: yq e '.spec.template.spec.containers[0].image' 'deployment/deployment.yaml'
+          cmd: yq e '.spec.template.spec.containers[0].image' 'deployment/env(deply_file_name)'
       - name: Push Tag
         run: |
           git tag $(echo "${{ steps.lookupVersion.outputs.result }}"  | sed "s/.*release-\([^ ]*\).*$/\1/")
