@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2.4.0
       - name: Set env to deployment
-        if: ${{ !has_canary }}
+        if: ${{ !inputs.has_canary }}
         run:  echo "deply_file_name=deployment.yaml" >> $GITHUB_ENV
       - name: Set env to canary
-        if: ${{ has_canary }}
+        if: ${{ inputs.has_canary }}
         run:  echo "deply_file_name=canary.yaml" >> $GITHUB_ENV
       - name: Extract Version
         id: lookupVersion
