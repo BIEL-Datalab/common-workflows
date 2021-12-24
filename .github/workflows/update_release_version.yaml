@@ -16,6 +16,11 @@ on:
          default: true
          required: false
          type: boolean
+       has_canary:
+         description: "has the canary.yaml or not"
+         default: false
+         required: false
+         type: boolean
          
 
 jobs:
@@ -34,7 +39,7 @@ jobs:
           echo VERSION=$VERSION
           echo "::set-output name=version::$VERSION"
       - name: Modify Deployment Yaml Tag
-        if: ${{ inputs.has_deployment }}
+        if: ${{ inputs.has_deployment && !inputs.has_canary}}
         uses: mikefarah/yq@master
         with:
           cmd: 
@@ -45,7 +50,12 @@ jobs:
         with:
           cmd:
             yq eval -i '.spec.jobTemplate.spec.template.spec.containers[0].image="${{ steps.image.outputs.version }}"'  'deployment/jobs.yaml' 
-
+      - name: Modify Canary Yaml Tag
+        if: ${{ inputs.has_canary }}
+        uses: mikefarah/yq@master
+        with:
+          cmd:
+            yq eval -i '.spec.template.spec.containers[0].image="${{ steps.image.outputs.version }}"'  'deployment/canary.yaml' 
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
