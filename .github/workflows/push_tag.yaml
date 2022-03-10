@@ -1,6 +1,12 @@
 name: Push tag pipeline
 on:
   workflow_call:
+    inputs:
+      deployment_yaml_path:
+        description: "deployment.yaml path"
+        default: 'deployment/deployment.yaml'
+        required: false
+        type: string
 
 jobs:
   push_tag:
@@ -12,7 +18,7 @@ jobs:
         id: lookupVersion
         uses: mikefarah/yq@master
         with:
-          cmd: yq e '.spec.template.spec.containers[0].image' 'deployment/deployment.yaml'
+          cmd: yq e '.spec.template.spec.containers[0].image' ${{ inputs.deployment_yaml_path }}
       - name: Push Tag
         run: |
           git tag $(echo "${{ steps.lookupVersion.outputs.result }}"  | sed "s/.*release-\([^ ]*\).*$/\1/")
