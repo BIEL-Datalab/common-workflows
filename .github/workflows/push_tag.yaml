@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       deployment_yaml_path:
-        description: "deployment_yaml.yaml path"
+        description: "deployment.yaml path"
         default: 'deployment/deployment.yaml'
         required: false
         type: string
