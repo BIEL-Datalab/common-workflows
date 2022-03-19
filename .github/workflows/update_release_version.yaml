@@ -36,7 +36,7 @@ jobs:
       - name: Extract Version
         id: image
         run: |
-          VERSION=bieldatalab/${{ github.event.repository.name }}:release-$(echo "${{ github.event.review.body }}"  | sed "s/.*release-\([^ ]*\).*$/\1/")
+          VERSION=bieldatalab/${{ github.event.repository.name }}:release-$(echo "${{ github.event.review.body }}" | tr -d '\n' | sed "s/.*release-\([^ ]*\).*$/\1/")
           echo VERSION=$VERSION
           echo "::set-output name=version::$VERSION"
       - name: Modify Deployment Yaml Tag
