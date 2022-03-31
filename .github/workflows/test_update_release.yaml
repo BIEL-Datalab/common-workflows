@@ -1,0 +1,63 @@
+name: Update release pipeline
+on:
+  pull_request_review:
+    types:
+      - submitted
+  workflow_call:
+    inputs:
+      has_jobs:
+        description: "has the jobs.yaml or not"
+        default: false
+        required: false
+        type: boolean
+      has_deployment:
+        description: "has the deploymen.yaml or not"
+        default: true
+        required: false
+        type: boolean
+      deployment_yaml_path:
+        description: "deployment.yaml path"
+        default: 'deployment/deployment.yaml'
+        required: false
+        type: string
+      jobs_yaml_path:
+        description: "jobs.yaml path"
+        default: 'deployment/jobs.yaml'
+        required: false
+        type: string
+
+
+jobs:
+  update_release_version:
+    if: ${{ github.event.review.state == 'approved' && contains(github.event.review.body, 'release-') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+      - name: Extract Version
+        id: image
+        run: |
+          VERSION=bieldatalab/${{ github.event.repository.name }}:release-$(echo "${{ github.event.review.body }}"  | sed "s/.*release-\([^ ]*\).*$/\1/")
+          echo VERSION=$VERSION
+          echo "::set-output name=version::$VERSION"
+      - name: Modify Deployment Yaml Tag
+        if: ${{ inputs.has_deployment && !inputs.has_canary}}
+        uses: mikefarah/yq@master
+        with:
+          cmd:
+            yq eval -i '.spec.template.spec.containers[0].image="${{ steps.image.outputs.version }}"' ${{ inputs.deployment_yaml_path }}
+      - name: Modify Jobs Yaml Tag
+        if: ${{ inputs.has_jobs }}
+        uses: mikefarah/yq@master
+        with:
+          cmd:
+            yq eval -i '.spec.jobTemplate.spec.template.spec.containers[0].image="${{ steps.image.outputs.version }}"' ${{ inputs.jobs_yaml_path }}
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: datalab-devops
+          author_email: datalab@bielcrystal.com
+          message: "Update image tag to ${{ steps.image.outputs.version }}"
+          add: "*.yaml"
