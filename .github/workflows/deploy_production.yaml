@@ -1,4 +1,4 @@
-name: Copy Tag To Master Pipeline
+name: Copy Tag From Test To Master Pipeline
 on:
   workflow_call:
 
