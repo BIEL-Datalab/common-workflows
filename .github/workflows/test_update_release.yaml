@@ -1,4 +1,5 @@
 name: Update release pipeline
+on:
   workflow_call:
     inputs:
       has_jobs:
