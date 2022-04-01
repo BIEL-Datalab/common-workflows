@@ -1,8 +1,7 @@
 name: Copy Tag To Master Pipeline
 on:
-  pull_request_review:
-    types:
-      - submitted
+  workflow_call:
+
 jobs:
   copy-from-test:
     if: github.event.pull_request.head.ref == 'test' && github.event.pull_request.base.ref == 'master' && github.event.review.state == 'approved'
