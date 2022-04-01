@@ -1,0 +1,29 @@
+name: Copy Tag To Master Pipeline
+on:
+  pull_request_review:
+    types:
+      - submitted
+jobs:
+  copy-from-test:
+    if: github.event.pull_request.head.ref == 'test' && github.event.pull_request.base.ref == 'master' && github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Extract Version From deploment/test/deployment.yaml
+        id: image
+        uses: mikefarah/yq@master
+        with:
+          cmd:
+            yq e '.spec.template.spec.containers[0].image' 'deployment/test/deployment.yaml'
+      - name: Modify Production Deployment Yaml Tag
+        uses: mikefarah/yq@master
+        with:
+          cmd:
+            yq eval -i '.spec.template.spec.containers[0].image="${{ steps.image.outputs.result }}"'  'deployment/production/deployment.yaml'
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: datalab-devops
+          author_email: datalab@bielcrystal.com
+          message: "Update image tag to ${{ steps.image.outputs.result }}"
+          add: "*.yaml"
