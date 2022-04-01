@@ -25,10 +25,6 @@ on:
 
 
 jobs:
-  on:
-    pull_request_review:
-      types:
-        - submitted
   update_release_version:
     if: ${{ github.event.review.state == 'approved' && contains(github.event.review.body, 'release-') }}
     runs-on: ubuntu-latest
