@@ -1,0 +1,17 @@
+name: Comment latest version when open/reopen PR
+on:
+  workflow_call:
+    secrets:
+      REPO_ACCESS_TOKEN:
+        required: true
+jobs:
+  update-latest-version-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment latest version in pr
+        uses: peter-evans/repository-dispatch@v1.1.3
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: BIEL-Datalab/container-image-webhook
+          event-type: update-latest-version-comment
+          client-payload: '{"action": "${{ github.event.action }}", "repo_name": "${{ github.event.repository.name }}", "pr_number": "${{ github.event.pull_request.number }}"}'
