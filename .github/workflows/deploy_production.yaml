@@ -1,6 +1,17 @@
 name: Copy Tag From Test To Master Pipeline
 on:
   workflow_call:
+    inputs:
+      production_deployment_yaml_path:
+        description: "production deployment.yaml path"
+        default: 'deployment/production/deployment.yaml'
+        required: false
+        type: string
+      test_deployment_yaml_path:
+        description: "test deployment.yaml path"
+        default: 'deployment/test/deployment.yaml'
+        required: false
+        type: string
 
 jobs:
   copy-from-test:
@@ -13,12 +24,12 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd:
-            yq e '.spec.template.spec.containers[0].image' 'deployment/test/deployment.yaml'
+            yq e '.spec.template.spec.containers[0].image' ${{ inputs.test_deployment_yaml_path }}
       - name: Modify Production Deployment Yaml Tag
         uses: mikefarah/yq@master
         with:
           cmd:
-            yq eval -i '.spec.template.spec.containers[0].image="${{ steps.image.outputs.result }}"'  'deployment/production/deployment.yaml'
+            yq eval -i '.spec.template.spec.containers[0].image="${{ steps.image.outputs.result }}"'  ${{ inputs.production_deployment_yaml_path }}
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
