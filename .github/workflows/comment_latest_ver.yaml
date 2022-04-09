@@ -4,6 +4,12 @@ on:
     secrets:
       REPO_ACCESS_TOKEN:
         required: true
+    inputs:
+      docker_repo_name:
+        description: "git repository name in dockerHub"
+        default: "${{ github.event.repository.name }}"
+        required: false
+        type: string
 jobs:
   update-latest-version-comment:
     runs-on: ubuntu-latest
@@ -14,4 +20,4 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: BIEL-Datalab/container-image-webhook
           event-type: update-latest-version-comment
-          client-payload: '{"action": "${{ github.event.action }}", "base": "${{ github.event.pull_request.base.ref }}", "repo_name": "${{ github.event.repository.name }}", "pr_number": "${{ github.event.pull_request.number }}"}'
+          client-payload: '{"action": "${{ github.event.action }}", "base": "${{ github.event.pull_request.base.ref }}", "docker_repo_name":"${{ inputs.docker_repo_name }}", "repo_name": "${{ github.event.repository.name }}", "pr_number": "${{ github.event.pull_request.number }}"}'
