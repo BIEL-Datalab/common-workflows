@@ -18,7 +18,7 @@ jobs:
     if: github.event.pull_request.head.ref == 'test' && github.event.pull_request.base.ref == 'master' && github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2.4.0
       - name: Extract Version From deploment/test/deployment.yaml
         id: image
         uses: mikefarah/yq@master
@@ -31,7 +31,7 @@ jobs:
           cmd:
             yq eval -i '.spec.template.spec.containers[0].image="${{ steps.image.outputs.result }}"'  ${{ inputs.production_deployment_yaml_path }}
       - name: Commit changes
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v7
         with:
           author_name: datalab-devops
           author_email: datalab@bielcrystal.com
