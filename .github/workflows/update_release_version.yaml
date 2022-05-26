@@ -2,6 +2,11 @@ name: Update release pipeline
 on:
   workflow_call:
     inputs:
+      image_name:
+        description: "the name of image to be built"
+        default: ${{ github.event.repository.name }}
+        required: false
+        type: string
       has_jobs:
         description: "has the jobs.yaml or not"
         default: false
@@ -36,7 +41,7 @@ jobs:
       - name: Extract Version
         id: image
         run: |
-          VERSION=bieldatalab/${{ github.event.repository.name }}:release-$(echo "${{ github.event.review.body }}" | tr -d '\n' | sed "s/.*release-\([^ ]*\).*$/\1/")
+          VERSION=bieldatalab/${{ inputs.image_name }}:release-$(echo "${{ github.event.review.body }}" | tr -d '\n' | sed "s/.*release-\([^ ]*\).*$/\1/")
           echo VERSION=$VERSION
           echo "::set-output name=version::$VERSION"
       - name: Modify Deployment Yaml Tag
