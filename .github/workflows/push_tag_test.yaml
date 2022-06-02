@@ -1,0 +1,48 @@
+name: Push tag pipeline
+on:
+  workflow_call:
+    inputs:
+      deployment_yaml_path:
+        description: "deployment.yaml path"
+        default: 'deployment/deployment.yaml'
+        required: false
+        type: string
+      has_jobs:
+        description: "has the jobs.yaml or not"
+        default: false
+        required: false
+        type: boolean
+      has_deployment:
+        description: "has the deploymen.yaml or not"
+        default: true
+        required: false
+        type: boolean
+      jobs_yaml_path:
+        description: "jobs.yaml path"
+        default: 'deployment/jobs.yaml'
+        required: false
+        type: string
+
+
+jobs:
+  push_tag:
+    if: ${{ contains(toJSON(github.event.commits), 'Update image tag to') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Extract Deployment Version
+        if: ${{ inputs.has_deployment }}
+        id: lookupDeploymentVersion
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq e '.spec.template.spec.containers[0].image' ${{ inputs.deployment_yaml_path }}
+      - name: Extract Jobs Version
+        if: ${{ inputs.has_jobs }}
+        id: lookupJobsVersion
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq e '.spec.jobTemplate.spec.template.spec.containers[0].image' ${{ inputs.jobs_yaml_path }}
+      - name: Push Tag
+        run: |
+          git tag $(echo "${{ steps.lookupDeploymentVersion.outputs.result || steps.lookupJobsVersion.outputs.result }}"  | sed "s/.*release-\([^ ]*\).*$/\1/")
+          git push --tag
