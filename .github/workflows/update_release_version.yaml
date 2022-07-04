@@ -31,7 +31,7 @@ on:
 
 jobs:
   update_release_version:
-    if: ${{ github.event.review.state == 'approved' && contains(github.event.review.body, 'release-') }}
+    if: ${{ github.event.review.state == 'approved' && contains(github.event.review.body, 'release-') && github.event.pull_request.base.ref != 'master'}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.4.0
