@@ -12,6 +12,17 @@ on:
         default: 'deployment/test/deployment.yaml'
         required: false
         type: string
+      has_jobs:
+        description: "has the jobs.yaml or not"
+        default: false
+        required: false
+        type: boolean
+      production_jobs_yaml_path:
+        description: "production jobs.yaml path"
+        default: 'deployment/production/jobs.yaml'
+        required: false
+        type: string
+
 
 jobs:
   copy-from-test:
@@ -30,6 +41,12 @@ jobs:
         with:
           cmd:
             yq eval -i '.spec.template.spec.containers[0].image="${{ steps.image.outputs.result }}"'  ${{ inputs.production_deployment_yaml_path }}
+      - name: Modify Production Jobs Yaml Tag
+        if: ${{ inputs.has_jobs }}
+        uses: mikefarah/yq@master
+        with:
+          cmd:
+            yq eval -i '.spec.jobTemplate.spec.template.spec.containers[0].image="${{ steps.image.outputs.version }}"'  ${{ inputs.production_jobs_yaml_path }}
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
