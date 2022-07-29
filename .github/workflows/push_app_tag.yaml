@@ -1,0 +1,27 @@
+name: Push app tag pipeline
+on:
+  workflow_call:
+    inputs:
+      value_yaml_path:
+        description: "values.yaml path"
+        default: 'chart/testing/values.yaml'
+        required: false
+        type: string
+
+
+jobs:
+  push_tag:
+    if: ${{ contains(toJSON(github.event.commits), 'Update image tag to') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Extract Deployment Version
+        if: ${{ inputs.has_deployment }}
+        id: lookupDeploymentVersion
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq e '.image.tag' ${{ inputs.value_yaml_path }}
+      - name: Push Tag
+        run: |
+          git tag $(echo "${{ steps.lookupDeploymentVersion.outputs.result }}"  | sed "s/.*release-\([^ ]*\).*$/\1/")
+          git push --tag
