@@ -2,9 +2,9 @@ name: Update helm application version pipeline
 on:
   workflow_call:
     inputs:
-      chart_yaml_path:
-        description: "Chart.yaml path"
-        default: 'chart/testing/Chart.yaml'
+      value_yaml_path:
+        description: "values.yaml path"
+        default: 'chart/testing/values.yaml'
         required: false
         type: string
 
@@ -27,7 +27,7 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd:
-            yq eval -i '.appVersion="${{ steps.image.outputs.version }}"' ${{ inputs.chart_yaml_path }}
+            yq eval -i '.image.tag="${{ steps.image.outputs.version }}"' ${{ inputs.value_yaml_path }}
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
